@@ -2,6 +2,7 @@ package com.example.tugaspertemuan12
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import com.example.tugaspertemuan12.databinding.ActivityMainBinding
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
@@ -21,5 +22,37 @@ class MainActivity : AppCompatActivity() {
         executorService = Executors.newSingleThreadExecutor()
         val db = NoteRoomDatabase.getDatabase(this)
         mNoteDao = db!!.noteDao()!!
+    }
+
+    private fun setEmptyField() {
+        with(binding) {
+            edtTitle.setText("")
+            edtDesc.setText("")
+        }
+    }
+
+    private fun getAllNotes(){
+        mNoteDao.allNotes.observe(this) {
+                notes ->
+                val adapter : ArrayAdapter<Note> = ArrayAdapter(this, android.R.layout.simple_list_item_1, notes)
+            binding.listView.adapter = adapter
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getAllNotes()
+    }
+
+    private fun insert(note: Note){
+        executorService.execute {
+            mNoteDao.insert(note)
+        }
+    }
+
+    private fun delete(note: Note){
+        executorService.execute {
+            mNoteDao.delete(note)
+        }
     }
 }
