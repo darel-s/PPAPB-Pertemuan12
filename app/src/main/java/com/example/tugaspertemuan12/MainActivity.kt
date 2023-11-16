@@ -22,6 +22,18 @@ class MainActivity : AppCompatActivity() {
         executorService = Executors.newSingleThreadExecutor()
         val db = NoteRoomDatabase.getDatabase(this)
         mNoteDao = db!!.noteDao()!!
+
+        with(binding) {
+            btnAdd.setOnClickListener {
+                insert(
+                    Note(
+                        title = edtTitle.text.toString(),
+                        description = edtDesc.text.toString()
+                    )
+                )
+            }
+            setEmptyField()
+        }
     }
 
     private fun setEmptyField() {
