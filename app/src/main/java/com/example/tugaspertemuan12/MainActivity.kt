@@ -2,11 +2,13 @@ package com.example.tugaspertemuan12
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.example.tugaspertemuan12.databinding.ActivityMainBinding
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import android.widget.AdapterView.OnItemLongClickListener
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -31,8 +33,33 @@ class MainActivity : AppCompatActivity() {
                         description = edtDesc.text.toString()
                     )
                 )
+                setEmptyField()
             }
-            setEmptyField()
+            listView.setOnItemClickListener{
+                adapterView, view, i, l ->
+                val item = adapterView.adapter.getItem(i) as Note
+                updateId = item.id
+                edtTitle.setText(item.title)
+                edtDesc.setText(item.description)
+            }
+
+            btnUpdate.setOnClickListener {
+                update(Note(
+                    id = updateId,
+                    title = edtTitle.text.toString(),
+                    description = edtDesc.text.toString()
+                ))
+                updateId = 0
+                setEmptyField()
+            }
+
+            listView.onItemLongClickListener =
+                AdapterView.OnItemLongClickListener{
+                    adapterView, view, i, l ->
+                    val item = adapterView.adapter.getItem(i) as Note
+                    delete(item)
+                    true
+                }
         }
     }
 
@@ -65,6 +92,12 @@ class MainActivity : AppCompatActivity() {
     private fun delete(note: Note){
         executorService.execute {
             mNoteDao.delete(note)
+        }
+    }
+
+    private fun update(note: Note){
+        executorService.execute {
+            mNoteDao.update(note)
         }
     }
 }
